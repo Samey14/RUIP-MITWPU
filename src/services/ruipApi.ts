@@ -101,14 +101,27 @@ export interface HealthCheckResponse {
   raw?: any;
 }
 
+export const PRODUCTION_FASTAPI_URL = 'https://ruip-mitwpu.onrender.com';
+
 /**
- * Resolves API URL based on VITE_RUIP_API_URL or defaults to same-origin /api path.
+ * Resolves API URL based on VITE_RUIP_API_URL or defaults to the production Render URL.
+ * Never uses localhost or 127.0.0.1 in production.
  */
 export function getApiBaseUrl(): string {
   const envUrl = (import.meta.env.VITE_RUIP_API_URL || '').trim();
   if (envUrl) {
     return envUrl.replace(/\/+$/, '');
   }
+  // In production builds or hosted environments, always use the deployed Render FastAPI backend
+  if (
+    import.meta.env.PROD ||
+    (typeof window !== 'undefined' &&
+      window.location.hostname !== 'localhost' &&
+      window.location.hostname !== '127.0.0.1')
+  ) {
+    return PRODUCTION_FASTAPI_URL;
+  }
+  // Local development fallback if VITE_RUIP_API_URL is unset
   return '';
 }
 

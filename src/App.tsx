@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Expense, FacultyCoordinator, ImmersionCamp, TripRecord, UserSession, Attachment, BillVerificationStatus, RegisteredUser } from './types';
 import { StorageService, FACULTY_ROSTER } from './services/storage';
 import { FirestoreService } from './services/firestoreSync';
-import { testFirestoreConnection, signOutUser } from './firebase';
+import { testFirestoreConnection, signOutUser, auth } from './firebase';
 import { useOnlineStatus, usePWAInstall, useTheme } from './hooks/usePWA';
 
 // Components
@@ -52,6 +52,11 @@ export default function App() {
     // Mandated test of Firestore connection on boot
     testFirestoreConnection();
 
+    // Per Firebase Skill: Only attach onSnapshot listeners if user is authenticated/session active
+    if (!session && !auth.currentUser) {
+      return;
+    }
+
     // Subscribe to real-time collections from Firebase Firestore
     const unsubExpenses = FirestoreService.subscribeExpenses((freshExpenses) => {
       setExpenses(freshExpenses);
@@ -75,7 +80,7 @@ export default function App() {
       unsubImmersion();
       unsubUsers();
     };
-  }, []);
+  }, [session]);
 
   // Sync state to LocalStorage for offline resilience
   useEffect(() => {

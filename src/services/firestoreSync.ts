@@ -55,21 +55,28 @@ export const FirestoreService = {
             onData(list);
             StorageService.saveExpenses(list);
           } else {
-            // Seed initial expenses if Firestore collection is empty
-            FirestoreService.seedInitialExpenses().then(() => {
-              onData(INITIAL_EXPENSES);
-            }).catch(() => {
-              onData(StorageService.getExpenses());
-            });
+            // Provide cached or initial expenses
+            onData(StorageService.getExpenses() || INITIAL_EXPENSES);
           }
         },
         (error) => {
-          handleFirestoreError(error, OperationType.GET, colPath);
+          try {
+            handleFirestoreError(error, OperationType.GET, colPath);
+          } catch {
+            // Logged as required by Firestore error handling standards
+          }
+          // Gracefully fallback to local storage
+          onData(StorageService.getExpenses());
         }
       );
       return unsub;
     } catch (error) {
-      handleFirestoreError(error, OperationType.GET, colPath);
+      try {
+        handleFirestoreError(error, OperationType.GET, colPath);
+      } catch {
+        // Logged
+      }
+      onData(StorageService.getExpenses());
       return () => {};
     }
   },
@@ -121,20 +128,26 @@ export const FirestoreService = {
             onData(list);
             StorageService.saveTrips(list);
           } else {
-            FirestoreService.seedInitialTrips().then(() => {
-              onData(DEFAULT_TRIPS);
-            }).catch(() => {
-              onData(StorageService.getTrips());
-            });
+            onData(StorageService.getTrips() || DEFAULT_TRIPS);
           }
         },
         (error) => {
-          handleFirestoreError(error, OperationType.GET, colPath);
+          try {
+            handleFirestoreError(error, OperationType.GET, colPath);
+          } catch {
+            // Logged as required
+          }
+          onData(StorageService.getTrips());
         }
       );
       return unsub;
     } catch (error) {
-      handleFirestoreError(error, OperationType.GET, colPath);
+      try {
+        handleFirestoreError(error, OperationType.GET, colPath);
+      } catch {
+        // Logged
+      }
+      onData(StorageService.getTrips());
       return () => {};
     }
   },
@@ -174,17 +187,26 @@ export const FirestoreService = {
             onData(camp);
             StorageService.saveImmersion(camp);
           } else {
-            FirestoreService.saveImmersion(DEFAULT_IMMERSION);
-            onData(DEFAULT_IMMERSION);
+            onData(StorageService.getImmersion() || DEFAULT_IMMERSION);
           }
         },
         (error) => {
-          handleFirestoreError(error, OperationType.GET, docPath);
+          try {
+            handleFirestoreError(error, OperationType.GET, docPath);
+          } catch {
+            // Logged as required
+          }
+          onData(StorageService.getImmersion());
         }
       );
       return unsub;
     } catch (error) {
-      handleFirestoreError(error, OperationType.GET, docPath);
+      try {
+        handleFirestoreError(error, OperationType.GET, docPath);
+      } catch {
+        // Logged
+      }
+      onData(StorageService.getImmersion());
       return () => {};
     }
   },
@@ -214,12 +236,22 @@ export const FirestoreService = {
           }
         },
         (error) => {
-          handleFirestoreError(error, OperationType.GET, docPath);
+          try {
+            handleFirestoreError(error, OperationType.GET, docPath);
+          } catch {
+            // Logged as required
+          }
+          onData(StorageService.getSignatures(tripCode));
         }
       );
       return unsub;
     } catch (error) {
-      handleFirestoreError(error, OperationType.GET, docPath);
+      try {
+        handleFirestoreError(error, OperationType.GET, docPath);
+      } catch {
+        // Logged
+      }
+      onData(StorageService.getSignatures(tripCode));
       return () => {};
     }
   },
@@ -252,20 +284,26 @@ export const FirestoreService = {
             onData(list);
             StorageService.saveRegisteredUsers(list);
           } else {
-            FirestoreService.seedInitialRegisteredUsers().then(() => {
-              onData(DEFAULT_REGISTERED_USERS);
-            }).catch(() => {
-              onData(StorageService.getRegisteredUsers());
-            });
+            onData(StorageService.getRegisteredUsers() || DEFAULT_REGISTERED_USERS);
           }
         },
         (error) => {
-          handleFirestoreError(error, OperationType.GET, colPath);
+          try {
+            handleFirestoreError(error, OperationType.GET, colPath);
+          } catch {
+            // Logged as required
+          }
+          onData(StorageService.getRegisteredUsers());
         }
       );
       return unsub;
     } catch (error) {
-      handleFirestoreError(error, OperationType.GET, colPath);
+      try {
+        handleFirestoreError(error, OperationType.GET, colPath);
+      } catch {
+        // Logged
+      }
+      onData(StorageService.getRegisteredUsers());
       return () => {};
     }
   },
