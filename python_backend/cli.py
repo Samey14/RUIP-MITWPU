@@ -8,13 +8,22 @@ import json
 import argparse
 from typing import List, Dict, Any
 
-from .analytics import (
-    compute_expense_statistics,
-    compute_breakdowns,
-    compute_burn_rate_forecast,
-    validate_expense_compliance,
-)
-from .pdf_generator import generate_settlement_statement_text
+try:
+    from .analytics import (
+        compute_expense_statistics,
+        compute_breakdowns,
+        compute_burn_rate_forecast,
+        validate_expense_compliance,
+    )
+    from .pdf_generator import generate_settlement_statement_text
+except (ImportError, ValueError):
+    from analytics import (
+        compute_expense_statistics,
+        compute_breakdowns,
+        compute_burn_rate_forecast,
+        validate_expense_compliance,
+    )
+    from pdf_generator import generate_settlement_statement_text
 
 # Sample expenses for standalone CLI verification
 SAMPLE_EXPENSES: List[Dict[str, Any]] = [

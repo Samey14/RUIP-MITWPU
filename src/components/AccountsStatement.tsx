@@ -3,10 +3,12 @@ import { Expense, FacultyCoordinator, ImmersionCamp } from '../types';
 import { StorageService } from '../services/storage';
 import { numToWordsINR } from '../utils/billGenerator';
 import { MitWpuLogo } from './MitWpuLogo';
+import { exportSettlementStatement, buildExpensePayload } from '../services/ruipApi';
 import {
   FileSpreadsheet,
   Printer,
   Download,
+  FileDown,
   ExternalLink,
   Send,
   Check,
@@ -59,6 +61,21 @@ export const AccountsStatement: React.FC<AccountsStatementProps> = ({
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [ledgerRemarkInput, setLedgerRemarkInput] = useState('');
   const [ledgerModalError, setLedgerModalError] = useState('');
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+
+  const handleDownloadPdfStatement = async () => {
+    try {
+      setIsExportingPdf(true);
+      const payload = buildExpensePayload(expenses, immersion, faculty.name);
+      await exportSettlementStatement(payload);
+    } catch (err: any) {
+      console.warn('Backend PDF export note:', err?.message || err);
+      // Fallback to print
+      handlePrint();
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
 
   useEffect(() => {
     setSignatures(StorageService.getSignatures(immersion.tripCode));
@@ -240,6 +257,16 @@ export const AccountsStatement: React.FC<AccountsStatementProps> = ({
           >
             <ExternalLink className="w-3.5 h-3.5 text-zinc-600 dark:text-zinc-400" />
             <span>Open in Tab</span>
+          </button>
+
+          <button
+            onClick={handleDownloadPdfStatement}
+            disabled={isExportingPdf}
+            className="px-3.5 py-2 rounded-xl border border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 text-xs font-semibold transition flex items-center gap-1.5"
+            title="Download Official Statement PDF from Python Backend"
+          >
+            <FileDown className="w-3.5 h-3.5" />
+            <span>{isExportingPdf ? 'Exporting...' : 'PDF Statement'}</span>
           </button>
 
           <button

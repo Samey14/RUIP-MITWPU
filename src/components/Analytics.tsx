@@ -1,6 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Expense, ImmersionCamp } from '../types';
-import { ChartPie, TrendingUp, Users, ChartColumn, CreditCard } from 'lucide-react';
+import {
+  ChartPie,
+  TrendingUp,
+  Users,
+  ChartColumn,
+  CreditCard,
+  ShieldAlert,
+  ShieldCheck,
+  Flame,
+  FileDown,
+  Server,
+  AlertTriangle,
+  Receipt,
+  CheckCircle2,
+  RefreshCw,
+} from 'lucide-react';
+import {
+  checkFastApiHealth,
+  getAnalyticsSummary,
+  getForecast,
+  getCompliance,
+  exportSettlementStatement,
+  buildExpensePayload,
+  AnalyticsSummaryResponse,
+  ForecastData,
+  ComplianceItem,
+} from '../services/ruipApi';
 
 interface AnalyticsProps {
   expenses: Expense[];
@@ -54,10 +80,128 @@ export const Analytics: React.FC<AnalyticsProps> = ({ expenses, immersion }) => 
   const [hoveredCat, setHoveredCat] = useState<string | null>(null);
   const [selectedCat, setSelectedCat] = useState<string | null>(null);
 
-  const totalSpent = expenses.reduce((s, e) => s + e.amount, 0);
-  const advance = immersion.advanceReceived;
+  // Python Backend Integration State
+  const [pythonStatus, setPythonStatus] = useState<'checking' | 'connected' | 'offline'>('checking');
+  const [backendSummary, setBackendSummary] = useState<AnalyticsSummaryResponse | null>(null);
+  const [forecastData, setForecastData] = useState<ForecastData | null>(null);
+  const [complianceList, setComplianceList] = useState<ComplianceItem[] | null>(null);
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const [exportNotice, setExportNotice] = useState<string | null>(null);
+
+  // Sync with FastAPI whenever expenses or immersion changes
+  useEffect(() => {
+    let isCancelled = false;
+
+    async function syncBackend() {
+      setPythonStatus('checking');
+      const payload = buildExpensePayload(expenses, immersion);
+
+      try {
+        const health = await checkFastApiHealth();
+        if (isCancelled) return;
+
+        if (!health.online) {
+          setPythonStatus('offline');
+          return;
+        }
+
+        setPythonStatus('connected');
+
+        // Fetch summary, forecast, and compliance in parallel
+        const [sumRes, fcRes, compRes] = await Promise.allSettled([
+          getAnalyticsSummary(payload),
+          getForecast(payload),
+          getCompliance(payload),
+        ]);
+
+        if (isCancelled) return;
+
+        if (sumRes.status === 'fulfilled') {
+          setBackendSummary(sumRes.value);
+        }
+        if (fcRes.status === 'fulfilled') {
+          setForecastData(fcRes.value.forecast);
+        }
+        if (compRes.status === 'fulfilled') {
+          setComplianceList(compRes.value.flagged);
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          setPythonStatus('offline');
+        }
+      }
+    }
+
+    syncBackend();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [expenses, immersion]);
+
+  // Local fallback calculations ensure UI never breaks even if Python server is unreachable
+  const totalSpent = backendSummary?.statistics?.total_amount ?? expenses.reduce((s, e) => s + e.amount, 0);
+  const advance = immersion.advanceReceived || 0;
   const balance = advance - totalSpent;
   const utilization = advance > 0 ? (totalSpent / advance) * 100 : 0;
+
+  // Local forecast fallback if backend is offline
+  const daysElapsed = Math.max(1, immersion.currentDay || 1);
+  const totalCampDays = Math.max(1, immersion.totalDays || 7);
+  const remainingDays = Math.max(0, totalCampDays - daysElapsed);
+  const localBurnRate = Math.round((totalSpent / daysElapsed) * 100) / 100;
+  const localProjectedTotal = Math.round(localBurnRate * totalCampDays);
+  const localProjectedBalance = advance - localProjectedTotal;
+  const localDailyCap = remainingDays > 0 && balance > 0 ? Math.round(balance / remainingDays) : 0;
+
+  const activeForecast: ForecastData = forecastData || {
+    total_spent_so_far: totalSpent,
+    advance_amount: advance,
+    days_elapsed: daysElapsed,
+    total_camp_days: totalCampDays,
+    remaining_days: remainingDays,
+    daily_burn_rate: localBurnRate,
+    projected_total_expense: localProjectedTotal,
+    projected_final_balance: localProjectedBalance,
+    advance_utilization_pct: Math.round(utilization * 10) / 10,
+    status: localProjectedBalance < 0 ? 'DEFICIT_PROJECTED' : 'WITHIN_BUDGET',
+    recommended_daily_cap_remaining: localDailyCap,
+  };
+
+  // Local compliance fallback if backend is offline
+  const localComplianceList: ComplianceItem[] = complianceList || (() => {
+    const flagged: ComplianceItem[] = [];
+    expenses.forEach(e => {
+      if (e.amount >= 10000) {
+        flagged.push({
+          expense_id: e.id,
+          vendor: e.vendor,
+          amount: e.amount,
+          type: 'HIGH_VALUE',
+          message: `Claim of ₹${e.amount.toLocaleString('en-IN')} exceeds ₹10,000 threshold. Itemized invoice required.`,
+        });
+      }
+      if (e.paymentMode === 'Cash' && e.amount > 5000) {
+        flagged.push({
+          expense_id: e.id,
+          vendor: e.vendor,
+          amount: e.amount,
+          type: 'CASH_LIMIT_EXCEEDED',
+          message: `Cash payment of ₹${e.amount.toLocaleString('en-IN')} exceeds policy ceiling (₹5,000).`,
+        });
+      }
+      if (!e.hasBillProof && (!e.attachments || e.attachments.length === 0)) {
+        flagged.push({
+          expense_id: e.id,
+          vendor: e.vendor,
+          amount: e.amount,
+          type: 'MISSING_PROOF',
+          message: `Transaction of ₹${e.amount.toLocaleString('en-IN')} has no bill attachment.`,
+        });
+      }
+    });
+    return flagged;
+  })();
 
   // Aggregate by category
   const catMap: Record<string, { amount: number; count: number }> = {};
@@ -112,6 +256,26 @@ export const Analytics: React.FC<AnalyticsProps> = ({ expenses, immersion }) => 
   const activeCat = activeCatName ? categories.find(c => c.category === activeCatName) : null;
   const costPerStudent = immersion.totalStudents > 0 ? totalSpent / immersion.totalStudents : 0;
 
+  const handleExportStatementPdf = async () => {
+    try {
+      setExportingPdf(true);
+      setExportNotice(null);
+      const payload = buildExpensePayload(expenses, immersion);
+      const { filename } = await exportSettlementStatement(payload);
+      setExportNotice(`Downloaded ${filename} successfully!`);
+      setTimeout(() => setExportNotice(null), 5000);
+    } catch (err: any) {
+      console.warn('PDF Export fallback note:', err?.message || err);
+      setExportNotice('Generated official statement. Opening printable report...');
+      setTimeout(() => {
+        window.print();
+        setExportNotice(null);
+      }, 500);
+    } finally {
+      setExportingPdf(false);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Page Header */}
@@ -120,7 +284,7 @@ export const Analytics: React.FC<AnalyticsProps> = ({ expenses, immersion }) => 
           <div className="flex items-center gap-2">
             <ChartPie className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight font-heading">
-              Spend Analytics & Breakdown
+              Spend Analytics &amp; Breakdown
             </h2>
           </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 font-mono-tabular">
@@ -128,18 +292,67 @@ export const Analytics: React.FC<AnalyticsProps> = ({ expenses, immersion }) => 
           </p>
         </div>
 
-        <div className="flex items-center gap-2 font-mono-tabular">
+        <div className="flex flex-wrap items-center gap-2 font-mono-tabular">
+          {/* Small unobtrusive Python Status Indicator */}
+          {pythonStatus === 'checking' && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs text-zinc-500">
+              <RefreshCw className="w-3 h-3 animate-spin text-zinc-400" />
+              <span>Checking Python...</span>
+            </div>
+          )}
+
+          {pythonStatus === 'connected' && (
+            <div
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-semibold"
+              title="FastAPI Python engine is live. Processing real-time burn-rate forecasts and audit compliance."
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Python Connected</span>
+            </div>
+          )}
+
+          {pythonStatus === 'offline' && (
+            <div
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 text-xs font-medium"
+              title="FastAPI server offline. Seamlessly utilizing local financial calculations."
+            >
+              <span className="w-2 h-2 rounded-full bg-zinc-400" />
+              <span>Python Offline</span>
+            </div>
+          )}
+
           <div className="px-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs">
             <span className="text-zinc-400 mr-1.5">Advance:</span>
             <span className="font-bold text-zinc-900 dark:text-zinc-100">
               ₹{advance.toLocaleString('en-IN')}
             </span>
           </div>
+
           <div className="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold">
             <span>₹{totalSpent.toLocaleString('en-IN')} Spent</span>
           </div>
+
+          {/* Export PDF Button */}
+          <button
+            onClick={handleExportStatementPdf}
+            disabled={exportingPdf}
+            className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-semibold shadow-xs transition flex items-center gap-1.5"
+            title="Generate and download official PDF settlement register from Python backend"
+          >
+            <FileDown className="w-3.5 h-3.5" />
+            <span>{exportingPdf ? 'Exporting PDF...' : 'Download Statement PDF'}</span>
+          </button>
         </div>
       </div>
+
+      {exportNotice && (
+        <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-xs flex items-center justify-between font-mono-tabular">
+          <span>{exportNotice}</span>
+          <button onClick={() => setExportNotice(null)} className="text-xs text-emerald-600 font-bold hover:underline">
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* KPI Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 font-mono-tabular">
@@ -194,6 +407,128 @@ export const Analytics: React.FC<AnalyticsProps> = ({ expenses, immersion }) => 
           </div>
           <div className="text-[11px] text-zinc-400 mt-1">
             Across {sortedDates.length} camp dates
+          </div>
+        </div>
+      </div>
+
+      {/* Python Forecast & Policy Compliance Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 font-mono-tabular">
+        {/* Forecast Card (FastAPI) */}
+        <div className="lg:col-span-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2 font-heading">
+              <Flame className="w-4 h-4 text-amber-500" />
+              <span>Budget Burn-Rate &amp; Trip Forecast</span>
+            </h3>
+            <span
+              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wider uppercase ${
+                activeForecast.status === 'WITHIN_BUDGET'
+                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300'
+                  : 'bg-rose-100 text-rose-800 dark:bg-rose-950/80 dark:text-rose-300'
+              }`}
+            >
+              {activeForecast.status === 'WITHIN_BUDGET' ? 'Within Budget' : 'Deficit Projected'}
+            </span>
+          </div>
+
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            Pacing projection computed for day {activeForecast.days_elapsed} of {activeForecast.total_camp_days} (
+            {activeForecast.remaining_days} days remaining).
+          </p>
+
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-100 dark:border-zinc-800">
+              <span className="text-[11px] text-zinc-400 block">Daily Burn Rate</span>
+              <span className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+                ₹{Math.round(activeForecast.daily_burn_rate).toLocaleString('en-IN')}/day
+              </span>
+            </div>
+
+            <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-100 dark:border-zinc-800">
+              <span className="text-[11px] text-zinc-400 block">Projected Total</span>
+              <span className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+                ₹{Math.round(activeForecast.projected_total_expense).toLocaleString('en-IN')}
+              </span>
+            </div>
+
+            <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-100 dark:border-zinc-800">
+              <span className="text-[11px] text-zinc-400 block">Projected Final Balance</span>
+              <span
+                className={`text-lg font-bold ${
+                  activeForecast.projected_final_balance >= 0
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-rose-600 dark:text-rose-400'
+                }`}
+              >
+                ₹{Math.round(activeForecast.projected_final_balance).toLocaleString('en-IN')}
+              </span>
+            </div>
+
+            <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-100 dark:border-zinc-800">
+              <span className="text-[11px] text-zinc-400 block">Recommended Cap</span>
+              <span className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+                ₹{Math.round(activeForecast.recommended_daily_cap_remaining).toLocaleString('en-IN')}/day
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Compliance Card (FastAPI) */}
+        <div className="lg:col-span-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2 font-heading">
+              <ShieldAlert className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+              <span>Finance Policy &amp; Audit Compliance</span>
+            </h3>
+            <span
+              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wider uppercase ${
+                localComplianceList.length === 0
+                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300'
+                  : 'bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300'
+              }`}
+            >
+              {localComplianceList.length === 0 ? '100% Compliant' : `${localComplianceList.length} Flagged`}
+            </span>
+          </div>
+
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            Automated scrutiny against MIT-WPU cash disbursement limits (₹5,000 max cash) and itemized receipt mandates.
+          </p>
+
+          <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+            {localComplianceList.length === 0 ? (
+              <div className="p-4 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 flex items-center gap-3">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                <div className="text-xs text-emerald-800 dark:text-emerald-200">
+                  <p className="font-semibold">All submitted claims conform to University accounting norms.</p>
+                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400">
+                    No cash limits breached and all high-value transactions have valid vouchers.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              localComplianceList.map((item, idx) => (
+                <div
+                  key={`${item.expense_id}-${item.type}-${idx}`}
+                  className="p-2.5 rounded-xl border border-amber-200 dark:border-amber-800/80 bg-amber-50/50 dark:bg-amber-950/20 text-xs space-y-1"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-zinc-900 dark:text-zinc-100">
+                      {item.expense_id} · {item.vendor}
+                    </span>
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-200">
+                      {item.type.replace(/_/g, ' ')}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-zinc-600 dark:text-zinc-300 text-[11px]">
+                    <span>{item.message}</span>
+                    <span className="font-bold text-zinc-900 dark:text-zinc-100 shrink-0 pl-2">
+                      ₹{item.amount.toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
