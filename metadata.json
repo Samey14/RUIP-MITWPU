@@ -1,6 +1,6 @@
 {
   "name": "RUIP Expense Tracker — MIT-WPU",
-  "description": "Sleek offline-ready expense tracking, faculty authentication, immersion budget ledger, and analytics for rural immersion programmes.",
+  "description": "Rural immersion expense settlements, real-time ledger verification, and cohort accounting for MIT World Peace University.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

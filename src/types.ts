@@ -19,7 +19,7 @@ export interface Expense {
   paymentMode: 'Cash' | 'UPI / online' | 'Card' | 'Net Banking';
   description?: string;
   billNumber?: string;
-  chargeTo: 'Students (64)' | 'Faculty (3)' | 'Shared' | string;
+  chargeTo: string;
   paidByFaculty: string;
   hasBillProof: boolean;
   hasUpiProof: boolean;

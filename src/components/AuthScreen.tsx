@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { signInWithGoogle, signOutUser } from '../firebase';
 import { StorageService, DEFAULT_REGISTERED_USERS } from '../services/storage';
+import { MitWpuLogo } from './MitWpuLogo';
 
 interface AuthScreenProps {
   onLogin: (session: UserSession) => void;
@@ -241,12 +242,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
       <div className="relative w-full max-w-md rounded-3xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-2xl p-7 sm:p-9 z-10 space-y-6">
         {/* Header / Brand */}
         <div className="text-center space-y-3">
-          <div className="inline-flex w-16 h-16 rounded-full p-1 bg-gradient-to-br from-[#f5dc88] via-[#c59a2f] to-[#8b6012] shadow-md mx-auto">
-            <img
-              src="/icon.svg"
-              alt="MIT-WPU Logo"
-              className="w-full h-full rounded-full bg-white object-contain"
-            />
+          <div className="flex justify-center">
+            <MitWpuLogo size="lg" />
           </div>
 
           <div>

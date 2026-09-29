@@ -1,5 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
   <defs>
+    <!-- Metallic Gold Outer Ring Gradient -->
     <linearGradient id="goldRing" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#EED48F" />
       <stop offset="25%" stop-color="#CFA145" />
@@ -7,31 +8,48 @@
       <stop offset="75%" stop-color="#B88628" />
       <stop offset="100%" stop-color="#936814" />
     </linearGradient>
+    <filter id="softGlow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="2" flood-color="#000000" flood-opacity="0.18" />
+    </filter>
   </defs>
 
-  <circle cx="150" cy="150" r="144" fill="#FFFFFF" stroke="url(#goldRing)" stroke-width="8" />
+  <!-- Outer White Circle with Gold Border -->
+  <circle cx="150" cy="150" r="144" fill="#FFFFFF" stroke="url(#goldRing)" stroke-width="8" filter="url(#softGlow)" />
   <circle cx="150" cy="150" r="139" fill="none" stroke="#D4AF37" stroke-width="1.2" opacity="0.6" />
 
-  <!-- DOME -->
+  <!-- DOME BUILDING (Navy Blue: #192A56 / #162447) -->
   <g stroke="#182C54" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Top Spire / Finial -->
     <path d="M150,42 L150,68" stroke-width="2.5" />
     <circle cx="150" cy="40" r="3.2" fill="#182C54" stroke-width="1" />
     <path d="M144,53 L156,53" stroke-width="2" />
     <path d="M142,61 L158,61" stroke-width="2" />
     <path d="M138,68 L162,68" stroke-width="2.5" fill="#182C54" />
 
+    <!-- Main Outer Dome Shell -->
     <path d="M78,142 C78,86 110,68 150,68 C190,68 222,86 222,142" stroke-width="3.2" />
+
+    <!-- Dome Ribs (Curved Meridian Arches) -->
+    <!-- Center meridian -->
     <path d="M150,68 L150,142" stroke-width="2.2" />
+    <!-- Left inner rib -->
     <path d="M150,68 C132,84 122,108 120,142" stroke-width="2" />
+    <!-- Right inner rib -->
     <path d="M150,68 C168,84 178,108 180,142" stroke-width="2" />
+    <!-- Left middle rib -->
     <path d="M150,68 C116,86 98,110 96,142" stroke-width="2" />
+    <!-- Right middle rib -->
     <path d="M150,68 C184,86 202,110 204,142" stroke-width="2" />
 
+    <!-- Horizontal Dome Waist Bands -->
     <path d="M76,142 L224,142" stroke-width="3" />
     <path d="M74,146 L226,146" stroke-width="2" />
 
+    <!-- Rotunda Colonnade Drum Level -->
+    <!-- Colonnade Top Cornice -->
     <rect x="70" y="146" width="160" height="4" fill="#182C54" stroke="none" />
 
+    <!-- Vertical Columns / Pillars (15 Pillars across drum) -->
     <g stroke-width="2.2">
       <line x1="75" y1="150" x2="75" y2="164" />
       <line x1="85" y1="150" x2="85" y2="164" />
@@ -51,22 +69,26 @@
       <line x1="225" y1="150" x2="225" y2="164" />
     </g>
 
+    <!-- Base Plinth & Balustrade Terrace -->
     <rect x="68" y="164" width="164" height="3" fill="#182C54" stroke="none" />
     <rect x="64" y="167" width="172" height="4.5" fill="#182C54" stroke="none" />
   </g>
 
-  <text x="236" y="126" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#182C54" text-anchor="middle">®</text>
+  <!-- Registered Trademark Sign ® -->
+  <text x="236" y="126" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#182C54" text-anchor="middle">®</text>
 
+  <!-- "MIT-WPU" in Vivid Red Bold -->
   <text x="150" y="210"
-        font-family="system-ui, -apple-system, sans-serif"
+        font-family="system-ui, -apple-system, 'Arial Black', sans-serif"
         font-size="37"
         font-weight="900"
         fill="#DC2626"
         letter-spacing="1"
         text-anchor="middle">MIT-WPU</text>
 
+  <!-- Sanskrit Devanagari Slogan: ॥ विश्वशान्तिर्ध्रुवं ध्रुवा ॥ -->
   <text x="150" y="240"
-        font-family="'Noto Sans Devanagari', 'Mangal', system-ui, sans-serif"
+        font-family="'Noto Sans Devanagari', 'Mangal', 'Devanagari MT', system-ui, sans-serif"
         font-size="15"
         font-weight="700"
         fill="#182C54"

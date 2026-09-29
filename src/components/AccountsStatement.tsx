@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Expense, FacultyCoordinator, ImmersionCamp } from '../types';
 import { StorageService } from '../services/storage';
 import { numToWordsINR } from '../utils/billGenerator';
+import { MitWpuLogo } from './MitWpuLogo';
 import {
   FileSpreadsheet,
   Printer,
@@ -365,12 +366,8 @@ export const AccountsStatement: React.FC<AccountsStatementProps> = ({
           <div className="relative bg-gradient-to-r from-[#002D5C] via-[#003E7E] to-[#0A4D94] text-white p-6 sm:p-7 border-b-4 border-amber-400">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-white shadow-md border-2 border-white/80 p-2 shrink-0 flex items-center justify-center ring-2 ring-amber-400/50">
-                  <img
-                    src="/icon.svg"
-                    alt="MIT-WPU Official Seal"
-                    className="w-full h-full object-contain"
-                  />
+                <div className="rounded-2xl bg-white shadow-md border-2 border-white/80 p-1.5 shrink-0 flex items-center justify-center ring-2 ring-amber-400/50">
+                  <MitWpuLogo size="lg" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">

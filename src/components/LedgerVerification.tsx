@@ -305,18 +305,6 @@ export const LedgerVerification: React.FC<LedgerVerificationProps> = ({
                         className="p-3.5 hover:bg-zinc-50/60 dark:hover:bg-zinc-800/30 transition space-y-2"
                       >
                         <div className="flex flex-wrap items-center gap-3">
-                          <button
-                            onClick={() => onViewExpenseReceipt(exp)}
-                            className="w-14 h-14 rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 shrink-0"
-                            title="Click to view full voucher"
-                          >
-                            <img
-                              src={getExpensePreviewUrl(exp)}
-                              alt={exp.vendor}
-                              className="w-full h-full object-cover"
-                            />
-                          </button>
-
                           <div className="min-w-[160px] flex-1">
                             <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 font-sans">
                               {exp.vendor}

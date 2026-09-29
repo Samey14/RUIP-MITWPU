@@ -1,6 +1,7 @@
 import React from 'react';
 import { FacultyCoordinator, ImmersionCamp } from '../types';
 import { MapPin, Plus, ExternalLink, Sun, Moon, LogOut } from 'lucide-react';
+import { MitWpuLogo } from './MitWpuLogo';
 
 interface HeaderProps {
   faculty: FacultyCoordinator;
@@ -41,13 +42,7 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveScreen('dashboard')}
               title="RUIP Expense Tracker"
             >
-              <div className="w-10 h-10 rounded-full p-0.5 bg-gradient-to-br from-[#f5dc88] via-[#c59a2f] to-[#8b6012] shadow-sm shrink-0">
-                <img
-                  src="/icon.svg"
-                  alt="MIT-WPU Seal"
-                  className="w-full h-full rounded-full object-contain bg-white"
-                />
-              </div>
+              <MitWpuLogo size="sm" />
               <div
                 className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white dark:border-zinc-900 ${
                   isOnline ? 'bg-emerald-500' : 'bg-amber-500'
@@ -63,10 +58,6 @@ export const Header: React.FC<HeaderProps> = ({
                 </span>
                 <span className="px-1.5 py-0.5 text-[10px] font-mono-tabular font-semibold rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60">
                   {isAdmin ? 'Accounts Admin' : immersion.academicYear}
-                </span>
-                <span className="hidden md:inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-mono-tabular font-semibold rounded bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60" title="Connected to Firebase Firestore Project ruip-expense-tracker---mitwpu">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                  <span>Firebase</span>
                 </span>
               </div>
               <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 font-mono-tabular">

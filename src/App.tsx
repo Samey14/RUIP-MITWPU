@@ -702,7 +702,7 @@ export default function App() {
         <footer className="border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 py-4 px-4 sm:px-6 lg:px-8 text-xs font-mono-tabular text-zinc-500 dark:text-zinc-400">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
             <div>
-              Dr. Vishwanath Karad MIT World Peace University · Rural Immersion Programme {activeImmersion.academicYear}
+              Accounts &amp; Finance Directorate · Dr. Vishwanath Karad MIT World Peace University, Pune · Rural Immersion Programme {activeImmersion.academicYear}
             </div>
             <div className="flex items-center gap-3">
               <button

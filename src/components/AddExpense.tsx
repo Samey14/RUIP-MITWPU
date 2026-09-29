@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FacultyCoordinator, ImmersionCamp, Expense, Attachment } from '../types';
 import {
   ArrowLeft,
@@ -38,6 +38,9 @@ export const AddExpense: React.FC<AddExpenseProps> = ({
   immersion,
   currentTotalSpent,
 }) => {
+  const studentHead = `Students (${immersion.totalStudents ?? 0})`;
+  const facultyHead = `Faculty (${immersion.totalFaculty ?? 0})`;
+
   const [amountStr, setAmountStr] = useState('');
   const [category, setCategory] = useState('Food');
   const [vendor, setVendor] = useState('');
@@ -45,10 +48,22 @@ export const AddExpense: React.FC<AddExpenseProps> = ({
   const [paymentMode, setPaymentMode] = useState<'Cash' | 'UPI / online' | 'Card' | 'Net Banking'>('Cash');
   const [description, setDescription] = useState('');
   const [billNumber, setBillNumber] = useState('');
-  const [chargeTo, setChargeTo] = useState('Students (64)');
+  const [chargeTo, setChargeTo] = useState(studentHead);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    setChargeTo(prev => {
+      if (prev.startsWith('Students')) {
+        return studentHead;
+      }
+      if (prev.startsWith('Faculty')) {
+        return facultyHead;
+      }
+      return prev;
+    });
+  }, [studentHead, facultyHead]);
 
   const amount = parseFloat(amountStr.replace(/[^0-9.]/g, '')) || 0;
   const projectedTotal = currentTotalSpent + amount;
@@ -111,7 +126,7 @@ export const AddExpense: React.FC<AddExpenseProps> = ({
       attachments,
       hasBillProof: hasBill,
       hasUpiProof: paymentMode === 'Cash' ? true : hasUpi,
-      billVerification: hasBill ? 'Pending' : 'Pending',
+      billVerification: 'Pending',
       createdAt: new Date().toISOString(),
     };
 
@@ -300,10 +315,10 @@ export const AddExpense: React.FC<AddExpenseProps> = ({
             <select
               value={chargeTo}
               onChange={e => setChargeTo(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono-tabular"
             >
-              <option value="Students (64)">Students (64)</option>
-              <option value="Faculty (3)">Faculty (3)</option>
+              <option value={studentHead}>{studentHead}</option>
+              <option value={facultyHead}>{facultyHead}</option>
               <option value="Shared">Shared</option>
             </select>
           </div>

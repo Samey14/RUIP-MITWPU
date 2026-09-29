@@ -23,6 +23,7 @@ import {
   MapPin,
   Check
 } from 'lucide-react';
+import { MitWpuLogo } from './MitWpuLogo';
 
 interface SidebarProps {
   activeScreen: string;
@@ -130,13 +131,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             className="flex items-center gap-3 text-left group focus:outline-none"
             title="RUIP Expense Tracker — MIT-WPU"
           >
-            <div className="w-10 h-10 rounded-full p-0.5 bg-gradient-to-br from-[#f5dc88] via-[#c59a2f] to-[#8b6012] shadow-sm shrink-0">
-              <img
-                src="/icon.svg"
-                alt="MIT-WPU Seal"
-                className="w-full h-full rounded-full object-contain bg-white"
-              />
-            </div>
+            <MitWpuLogo size="sm" />
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-bold text-sm text-zinc-900 dark:text-zinc-100 tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors font-heading">

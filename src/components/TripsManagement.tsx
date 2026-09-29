@@ -43,33 +43,6 @@ function parseStudents(str: string): string[] {
     .filter(Boolean);
 }
 
-const SAMPLE_64_STUDENTS = [
-  '1032230001 - Aarav Patil (School of Engineering - CSE)',
-  '1032230002 - Ananya Deshpande (School of Engineering - CSE)',
-  '1032230003 - Rohan Joshi (School of Engineering - Mech)',
-  '1032230004 - Tanvi Kulkarni (School of Engineering - Civil)',
-  '1032230005 - Aditya Shinde (School of Engineering - ECE)',
-  '1032230006 - Snehal Gaikwad (School of Engineering - CSE)',
-  '1032230007 - Pranav More (School of Engineering - Chemical)',
-  '1032230008 - Neha Pawar (School of Engineering - Electrical)',
-  '1032230009 - Siddharth Jadhav (School of Engineering - CSE)',
-  '1032230010 - Riya Sawant (School of Engineering - Petroleum)',
-  '1032230011 - Omkar Chavan (School of Engineering - Civil)',
-  '1032230012 - Pooja Kadam (School of Engineering - Mech)',
-  '1032230013 - Yash Bhosale (School of Engineering - CSE)',
-  '1032230014 - Shruti Mane (School of Engineering - ECE)',
-  '1032230015 - Digvijay Rane (School of Engineering - IT)',
-  '1032230016 - Gaurav Salunkhe (School of Engineering - CSE)',
-  '1032230017 - Sanjana Thorat (School of Engineering - Civil)',
-  '1032230018 - Mayur Jagtap (School of Engineering - Mech)',
-  '1032230019 - Priyanka Mohite (School of Engineering - ECE)',
-  '1032230020 - Kunal Shirole (School of Engineering - CSE)',
-  '1032230021 - Sakshi Wagh (School of Engineering - Electrical)',
-  '1032230022 - Tejas Date (School of Engineering - Mech)',
-  '1032230023 - Vaidehi Gokhale (School of Engineering - CSE)',
-  '1032230024 - Rushikesh Kale (School of Engineering - Civil)',
-];
-
 const EMPTY_TRIP = {
   location: '',
   village: '',
@@ -490,19 +463,6 @@ export const TripsManagement: React.FC<TripsManagementProps> = ({
                         onChange={handleFileUpload}
                       />
                     </label>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setForm(prev => ({
-                          ...prev,
-                          studentsListText: SAMPLE_64_STUDENTS.join('\n'),
-                        }));
-                        setError('');
-                      }}
-                      className="px-2.5 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950/80 text-[11px] font-semibold text-emerald-800 dark:text-emerald-300 transition"
-                    >
-                      + Sample 24 Students
-                    </button>
                   </div>
                 </div>
 
@@ -596,25 +556,45 @@ export const TripsManagement: React.FC<TripsManagementProps> = ({
             />
 
             <div className="flex-1 overflow-y-auto divide-y divide-zinc-100 dark:divide-zinc-800 text-xs font-mono-tabular">
-              {(viewingRosterTrip.studentsList && viewingRosterTrip.studentsList.length > 0
-                ? viewingRosterTrip.studentsList
-                : SAMPLE_64_STUDENTS
-              )
-                .filter(st => st.toLowerCase().includes(rosterSearch.toLowerCase()))
-                .map((student, idx) => (
+              {(() => {
+                const tripStudents =
+                  viewingRosterTrip.studentsList && viewingRosterTrip.studentsList.length > 0
+                    ? viewingRosterTrip.studentsList
+                    : Array.from(
+                        { length: viewingRosterTrip.totalStudents || 0 },
+                        (_, i) =>
+                          `${1032230001 + i} - Enrolled Student #${i + 1} (${viewingRosterTrip.department || 'MIT-WPU'})`
+                      );
+
+                const filtered = tripStudents.filter(st =>
+                  st.toLowerCase().includes(rosterSearch.toLowerCase())
+                );
+
+                if (filtered.length === 0) {
+                  return (
+                    <div className="py-6 text-center text-zinc-400">
+                      No students found matching "{rosterSearch}"
+                    </div>
+                  );
+                }
+
+                return filtered.map((student, idx) => (
                   <div key={idx} className="py-2.5 flex items-center justify-between gap-2">
                     <span className="text-zinc-400 text-[10px] w-6 text-center">{idx + 1}</span>
-                    <span className="font-semibold text-zinc-800 dark:text-zinc-200 flex-1 truncate">{student}</span>
+                    <span className="font-semibold text-zinc-800 dark:text-zinc-200 flex-1 truncate">
+                      {student}
+                    </span>
                     <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold shrink-0">
                       Enrolled
                     </span>
                   </div>
-                ))}
+                ));
+              })()}
             </div>
 
             <div className="flex justify-between items-center pt-3 border-t border-zinc-200 dark:border-zinc-800 text-xs">
               <span className="text-zinc-500 font-mono-tabular">
-                {(viewingRosterTrip.studentsList || SAMPLE_64_STUDENTS).length} Total Students
+                {viewingRosterTrip.totalStudents || (viewingRosterTrip.studentsList?.length ?? 0)} Total Students Enrolled
               </span>
               <button
                 onClick={() => setViewingRosterTrip(null)}
