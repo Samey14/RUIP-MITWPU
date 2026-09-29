@@ -14,7 +14,8 @@ import {
   Copy,
   ExternalLink,
 } from 'lucide-react';
-import { signInWithGoogle, signOutUser } from '../firebase';
+import { signInWithGoogle, signOutUser, auth } from '../firebase';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { StorageService, DEFAULT_REGISTERED_USERS } from '../services/storage';
 import { MitWpuLogo } from './MitWpuLogo';
 
@@ -96,6 +97,12 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
       }
 
       // 4. Authorized Login as authenticated individual
+      console.log('[Auth] Firebase Google Authentication successful:', {
+        uid: user.uid,
+        email: user.email,
+        provider: user.providerData[0]?.providerId || 'google.com'
+      });
+
       const session: UserSession = {
         email: userRecord.email,
         role: userRecord.role,
@@ -141,8 +148,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
     setTimeout(() => setIsCopied(false), 3000);
   };
 
-  // Password Sign-In with Individual Password Validation
-  const handleSubmit = (e: React.FormEvent) => {
+  // Password Sign-In with Individual Password Validation & Firebase Authentication
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsSubmitting(true);
@@ -188,7 +195,41 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
       return;
     }
 
-    // 5. Authorized Login
+    // 5. Complete Firebase Authentication so onAuthStateChanged confirms current user
+    try {
+      let fbUser;
+      try {
+        const cred = await signInWithEmailAndPassword(auth, cleanEmail, expectedPassword);
+        fbUser = cred.user;
+      } catch (authErr: any) {
+        if (
+          authErr?.code === 'auth/user-not-found' ||
+          authErr?.code === 'auth/invalid-credential' ||
+          authErr?.code === 'auth/invalid-login-credentials'
+        ) {
+          try {
+            const newCred = await createUserWithEmailAndPassword(auth, cleanEmail, expectedPassword);
+            fbUser = newCred.user;
+          } catch (createErr) {
+            console.warn('[Auth] Firebase account creation fallback:', createErr);
+          }
+        } else {
+          console.warn('[Auth] Firebase sign-in notice:', authErr?.message || authErr);
+        }
+      }
+
+      if (fbUser) {
+        console.log('[Auth] Firebase email/password authentication successful:', {
+          uid: fbUser.uid,
+          email: fbUser.email,
+          provider: fbUser.providerData[0]?.providerId || 'password'
+        });
+      }
+    } catch (fbErr) {
+      console.warn('[Auth] Firebase authentication flow notice:', fbErr);
+    }
+
+    // 6. Authorized Login
     const session: UserSession = {
       email: userRecord.email,
       role: userRecord.role,

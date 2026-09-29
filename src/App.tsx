@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { onAuthStateChanged, User } from 'firebase/auth';
 import { Expense, FacultyCoordinator, ImmersionCamp, TripRecord, UserSession, Attachment, BillVerificationStatus, RegisteredUser } from './types';
 import { StorageService, FACULTY_ROSTER } from './services/storage';
 import { FirestoreService } from './services/firestoreSync';
@@ -31,6 +32,8 @@ export default function App() {
 
   const [activeScreen, setActiveScreen] = useState('dashboard');
   const [session, setSession] = useState<UserSession | null>(() => StorageService.getSession());
+  const [firebaseUser, setFirebaseUser] = useState<User | null>(() => auth.currentUser);
+  const [authReady, setAuthReady] = useState(false);
 
   // Data states
   const [faculty, setFaculty] = useState<FacultyCoordinator>(() => StorageService.getFaculty());
@@ -47,40 +50,69 @@ export default function App() {
   const [immersionModalOpen, setImmersionModalOpen] = useState(false);
   const [selectedExpenseForReceipt, setSelectedExpenseForReceipt] = useState<Expense | null>(null);
 
-  // Firestore Real-Time Subscriptions & Connection Test
+  // Firebase Auth Lifecycle & Authoritative Firestore Subscriptions
   useEffect(() => {
-    // Mandated test of Firestore connection on boot
-    testFirestoreConnection();
+    let unsubs: (() => void)[] = [];
 
-    // Per Firebase Skill: Only attach onSnapshot listeners if user is authenticated/session active
-    if (!session && !auth.currentUser) {
-      return;
-    }
+    const unsubAuth = onAuthStateChanged(auth, async (user) => {
+      // Diagnostic log 1: auth state changed + Firebase UID
+      console.log('[Auth Lifecycle] auth state changed:', {
+        authenticated: !!user,
+        firebaseUID: user ? user.uid : null,
+        provider: user?.providerData?.map(p => p.providerId) || []
+      });
 
-    // Subscribe to real-time collections from Firebase Firestore
-    const unsubExpenses = FirestoreService.subscribeExpenses((freshExpenses) => {
-      setExpenses(freshExpenses);
-    });
+      if (user) {
+        setFirebaseUser(user);
+        setAuthReady(true);
 
-    const unsubTrips = FirestoreService.subscribeTrips((freshTrips) => {
-      setTrips(freshTrips);
-    });
+        // Verify connection when user is authenticated
+        testFirestoreConnection();
 
-    const unsubImmersion = FirestoreService.subscribeImmersion((freshCamp) => {
-      setImmersion(freshCamp);
-    });
+        // Diagnostic log 2: whether listeners are being attached
+        console.log('[Firestore Listeners] Attaching real-time Firestore listeners for confirmed UID:', user.uid);
 
-    const unsubUsers = FirestoreService.subscribeRegisteredUsers((freshUsers) => {
-      setRegisteredUsers(freshUsers);
+        // Sequence of attachments
+        const unsubExpenses = FirestoreService.subscribeExpenses((freshExpenses) => {
+          setExpenses(freshExpenses);
+        });
+
+        const unsubTrips = FirestoreService.subscribeTrips((freshTrips) => {
+          setTrips(freshTrips);
+        });
+
+        const unsubImmersion = FirestoreService.subscribeImmersion((freshCamp) => {
+          setImmersion(freshCamp);
+        });
+
+        const unsubUsers = FirestoreService.subscribeRegisteredUsers((freshUsers) => {
+          setRegisteredUsers(freshUsers);
+        });
+
+        unsubs = [unsubExpenses, unsubTrips, unsubImmersion, unsubUsers];
+      } else {
+        // Requirement 5 & 11: When the user signs out, immediately unsubscribe all Firestore listeners
+        if (unsubs.length > 0) {
+          console.log('[Firestore Listeners] Unsubscribing all Firestore listeners (user signed out or null)');
+          unsubs.forEach(unsub => unsub());
+          unsubs = [];
+        } else {
+          console.log('[Firestore Listeners] No active Firestore listeners to unsubscribe (unauthenticated state)');
+        }
+        setFirebaseUser(null);
+        setAuthReady(true);
+      }
     });
 
     return () => {
-      unsubExpenses();
-      unsubTrips();
-      unsubImmersion();
-      unsubUsers();
+      if (unsubs.length > 0) {
+        console.log('[Firestore Listeners] Component cleanup: unsubscribing all Firestore listeners');
+        unsubs.forEach(unsub => unsub());
+        unsubs = [];
+      }
+      unsubAuth();
     };
-  }, [session]);
+  }, []);
 
   // Sync state to LocalStorage for offline resilience
   useEffect(() => {
@@ -229,8 +261,9 @@ export default function App() {
     StorageService.deleteRegisteredUser(userId);
   };
 
-  const handleLogout = () => {
-    signOutUser();
+  const handleLogout = async () => {
+    console.log('[Auth] User sign-out initiated');
+    await signOutUser();
     setSession(null);
     setActiveScreen('dashboard');
   };

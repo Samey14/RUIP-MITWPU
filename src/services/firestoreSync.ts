@@ -7,7 +7,7 @@ import {
   getDocs,
   writeBatch
 } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../firebase';
+import { db, handleFirestoreError, OperationType, auth } from '../firebase';
 import { Expense, TripRecord, ImmersionCamp, FacultyCoordinator, RegisteredUser } from '../types';
 import { INITIAL_EXPENSES, DEFAULT_TRIPS, DEFAULT_IMMERSION, DEFAULT_FACULTY, DEFAULT_REGISTERED_USERS, StorageService } from './storage';
 
@@ -39,6 +39,10 @@ export function sanitizeForFirestore<T>(data: T): T {
 export const FirestoreService = {
   // Sync expenses collection in real-time
   subscribeExpenses(onData: (expenses: Expense[]) => void): () => void {
+    if (!auth.currentUser) {
+      onData(StorageService.getExpenses() || INITIAL_EXPENSES);
+      return () => {};
+    }
     const colPath = 'expenses';
     try {
       const unsub = onSnapshot(
@@ -82,6 +86,7 @@ export const FirestoreService = {
   },
 
   async seedInitialExpenses(): Promise<void> {
+    if (!auth.currentUser) return;
     const colPath = 'expenses';
     try {
       const batch = writeBatch(db);
@@ -96,6 +101,7 @@ export const FirestoreService = {
   },
 
   async saveExpense(expense: Expense): Promise<void> {
+    if (!auth.currentUser) return;
     const docPath = `expenses/${expense.id}`;
     try {
       await setDoc(doc(db, 'expenses', expense.id), sanitizeForFirestore(expense));
@@ -105,6 +111,7 @@ export const FirestoreService = {
   },
 
   async deleteExpense(expenseId: string): Promise<void> {
+    if (!auth.currentUser) return;
     const docPath = `expenses/${expenseId}`;
     try {
       await deleteDoc(doc(db, 'expenses', expenseId));
@@ -115,6 +122,10 @@ export const FirestoreService = {
 
   // Sync Trips in real-time
   subscribeTrips(onData: (trips: TripRecord[]) => void): () => void {
+    if (!auth.currentUser) {
+      onData(StorageService.getTrips() || DEFAULT_TRIPS);
+      return () => {};
+    }
     const colPath = 'trips';
     try {
       const unsub = onSnapshot(
@@ -153,6 +164,7 @@ export const FirestoreService = {
   },
 
   async seedInitialTrips(): Promise<void> {
+    if (!auth.currentUser) return;
     const colPath = 'trips';
     try {
       const batch = writeBatch(db);
@@ -167,6 +179,7 @@ export const FirestoreService = {
   },
 
   async saveTrip(trip: TripRecord): Promise<void> {
+    if (!auth.currentUser) return;
     const docPath = `trips/${trip.id}`;
     try {
       await setDoc(doc(db, 'trips', trip.id), sanitizeForFirestore(trip));
@@ -177,6 +190,10 @@ export const FirestoreService = {
 
   // Sync Active Immersion Camp
   subscribeImmersion(onData: (camp: ImmersionCamp) => void): () => void {
+    if (!auth.currentUser) {
+      onData(StorageService.getImmersion() || DEFAULT_IMMERSION);
+      return () => {};
+    }
     const docPath = 'camps/active';
     try {
       const unsub = onSnapshot(
@@ -212,6 +229,7 @@ export const FirestoreService = {
   },
 
   async saveImmersion(camp: ImmersionCamp): Promise<void> {
+    if (!auth.currentUser) return;
     const docPath = 'camps/active';
     try {
       await setDoc(doc(db, 'camps', 'active'), sanitizeForFirestore(camp));
@@ -222,6 +240,10 @@ export const FirestoreService = {
 
   // Signatures
   subscribeSignatures(tripCode: string, onData: (signatures: Record<string, string>) => void): () => void {
+    if (!auth.currentUser) {
+      onData(StorageService.getSignatures(tripCode));
+      return () => {};
+    }
     const docPath = `signatures/${tripCode}`;
     try {
       const unsub = onSnapshot(
@@ -257,6 +279,7 @@ export const FirestoreService = {
   },
 
   async saveSignatures(tripCode: string, signatures: Record<string, string>): Promise<void> {
+    if (!auth.currentUser) return;
     const docPath = `signatures/${tripCode}`;
     try {
       await setDoc(
@@ -271,6 +294,10 @@ export const FirestoreService = {
 
   // Sync Registered Users (Admin managed directory)
   subscribeRegisteredUsers(onData: (users: RegisteredUser[]) => void): () => void {
+    if (!auth.currentUser) {
+      onData(StorageService.getRegisteredUsers() || DEFAULT_REGISTERED_USERS);
+      return () => {};
+    }
     const colPath = 'registered_users';
     try {
       const unsub = onSnapshot(
@@ -309,6 +336,7 @@ export const FirestoreService = {
   },
 
   async seedInitialRegisteredUsers(): Promise<void> {
+    if (!auth.currentUser) return;
     const colPath = 'registered_users';
     try {
       const batch = writeBatch(db);
@@ -323,6 +351,7 @@ export const FirestoreService = {
   },
 
   async saveRegisteredUser(user: RegisteredUser): Promise<void> {
+    if (!auth.currentUser) return;
     const docPath = `registered_users/${user.id}`;
     try {
       await setDoc(doc(db, 'registered_users', user.id), sanitizeForFirestore(user));
@@ -332,6 +361,7 @@ export const FirestoreService = {
   },
 
   async deleteRegisteredUser(userId: string): Promise<void> {
+    if (!auth.currentUser) return;
     const docPath = `registered_users/${userId}`;
     try {
       await deleteDoc(doc(db, 'registered_users', userId));

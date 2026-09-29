@@ -1,42 +1,14 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import { spawn } from 'child_process';
-import net from 'net';
-import { defineConfig, Plugin } from 'vite';
+import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
-function pythonBackendPlugin(): Plugin {
-  return {
-    name: 'python-backend-runner',
-    configureServer() {
-      const port = Number(process.env.FASTAPI_PORT) || 8002;
-      const client = new net.Socket();
-      client.connect(port, '127.0.0.1', () => {
-        client.destroy();
-        console.log(`[RUIP] FastAPI backend is active on port ${port}`);
-      });
-      client.on('error', () => {
-        client.destroy();
-        console.log(`[RUIP] Launching FastAPI backend server on port ${port}...`);
-        const proc = spawn('python3', ['-m', 'python_backend.main'], {
-          env: { ...process.env, FASTAPI_PORT: String(port) },
-          stdio: 'ignore',
-          detached: true,
-        });
-        proc.unref();
-      });
-    },
-  };
-}
-
 export default defineConfig(() => {
-  const fastApiPort = process.env.FASTAPI_PORT || '8002';
   return {
     plugins: [
       react(),
       tailwindcss(),
-      pythonBackendPlugin(),
       VitePWA({
         registerType: 'autoUpdate',
         includeAssets: ['apple-touch-icon.png', 'icon.svg', 'assets/*.svg'],
@@ -120,13 +92,6 @@ export default defineConfig(() => {
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
-      proxy: {
-        '/api': {
-          target: process.env.FASTAPI_BACKEND_URL || `http://127.0.0.1:${fastApiPort}`,
-          changeOrigin: true,
-          secure: false,
-        },
-      },
     },
   };
 });

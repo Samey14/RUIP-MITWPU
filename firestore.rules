@@ -3,24 +3,24 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Default deny catch-all
-    match /{document=**} {
-      allow read, write: if false;
-    }
-
-    // Test connection doc used to verify Firestore connectivity
-    match /test/connection {
-      allow read: if true;
+    // Helper: Require authenticated Firebase user
+    function isSignedIn() {
+      return request.auth != null;
     }
 
     function isValidId(id) {
       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
 
+    // Test connection doc used to verify Firestore connectivity
+    match /test/connection {
+      allow read: if isSignedIn();
+    }
+
     // Rural Immersion Programme Expenses
     match /expenses/{expenseId} {
-      allow read: if true;
-      allow create, update: if isValidId(expenseId)
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidId(expenseId)
         && request.resource.data.amount is number
         && request.resource.data.amount >= 0
         && request.resource.data.category is string
@@ -29,41 +29,41 @@ service cloud.firestore {
         && request.resource.data.vendor.size() <= 200
         && request.resource.data.paidByFaculty is string
         && request.resource.data.paidByFaculty.size() <= 200;
-      allow delete: if isValidId(expenseId);
+      allow delete: if isSignedIn() && isValidId(expenseId);
     }
 
     // Rural Immersion Cohort Trips
     match /trips/{tripId} {
-      allow read: if true;
-      allow create, update: if isValidId(tripId)
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidId(tripId)
         && request.resource.data.tripCode is string
         && request.resource.data.tripCode.size() <= 100
         && request.resource.data.budget is number;
-      allow delete: if isValidId(tripId);
+      allow delete: if isSignedIn() && isValidId(tripId);
     }
 
     // Active Camp Configuration
     match /camps/{campId} {
-      allow read: if true;
-      allow write: if isValidId(campId);
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && isValidId(campId);
     }
 
     // Faculty Roster
     match /faculty/{facultyId} {
-      allow read: if true;
-      allow write: if isValidId(facultyId);
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && isValidId(facultyId);
     }
 
     // Registered Institutional Users (Managed by Admin Department)
     match /registered_users/{userId} {
-      allow read: if true;
-      allow write: if isValidId(userId);
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && isValidId(userId);
     }
 
     // Statement Clearances & Signatures
     match /signatures/{tripCode} {
-      allow read: if true;
-      allow write: if isValidId(tripCode);
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && isValidId(tripCode);
     }
   }
 }
