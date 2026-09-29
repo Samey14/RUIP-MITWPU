@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="goldRim2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f5dc88"/>
+      <stop offset="35%" stop-color="#c59a2f"/>
+      <stop offset="70%" stop-color="#f5dc88"/>
+      <stop offset="100%" stop-color="#8b6012"/>
+    </linearGradient>
+  </defs>
+  <circle cx="256" cy="256" r="248" fill="url(#goldRim2)"/>
+  <circle cx="256" cy="256" r="236" fill="#ffffff" stroke="#c59a2f" stroke-width="2" stroke-dasharray="4 3"/>
+  <g id="dome" transform="translate(0, -10)">
+    <path d="M 251 32 H 261 V 48 H 272 V 58 H 261 V 78 H 251 V 58 H 240 V 48 H 251 Z" fill="#003876"/>
+    <rect x="238" y="76" width="36" height="8" rx="2" fill="#003876"/>
+    <path d="M 112 210 C 112 110, 172 82, 256 82 C 340 82, 400 110, 400 210 Z" fill="none" stroke="#003876" stroke-width="8"/>
+    <path d="M 132 210 C 138 135, 186 96, 256 82 C 326 96, 374 135, 380 210" fill="none" stroke="#003876" stroke-width="4"/>
+    <path d="M 166 210 C 178 152, 210 108, 256 84 C 302 108, 334 152, 346 210" fill="none" stroke="#003876" stroke-width="4"/>
+    <path d="M 210 210 C 218 165, 235 118, 256 84 C 277 118, 294 165, 302 210" fill="none" stroke="#003876" stroke-width="4"/>
+    <line x1="256" y1="84" x2="256" y2="210" stroke="#003876" stroke-width="5"/>
+    <path d="M 126 168 C 158 134, 354 134, 386 168" fill="none" stroke="#003876" stroke-width="4"/>
+    <path d="M 148 132 C 178 110, 334 110, 364 132" fill="none" stroke="#003876" stroke-width="3"/>
+    <rect x="76" y="210" width="360" height="42" fill="#003876" rx="3"/>
+    <g fill="#ffffff">
+      <rect x="88" y="218" width="12" height="26" rx="4"/>
+      <rect x="110" y="218" width="12" height="26" rx="4"/>
+      <rect x="132" y="218" width="12" height="26" rx="4"/>
+      <rect x="154" y="218" width="12" height="26" rx="4"/>
+      <rect x="176" y="218" width="12" height="26" rx="4"/>
+      <rect x="198" y="218" width="12" height="26" rx="4"/>
+      <rect x="220" y="218" width="12" height="26" rx="4"/>
+      <rect x="242" y="218" width="12" height="26" rx="4"/>
+      <rect x="264" y="218" width="12" height="26" rx="4"/>
+      <rect x="286" y="218" width="12" height="26" rx="4"/>
+      <rect x="308" y="218" width="12" height="26" rx="4"/>
+      <rect x="330" y="218" width="12" height="26" rx="4"/>
+      <rect x="352" y="218" width="12" height="26" rx="4"/>
+      <rect x="374" y="218" width="12" height="26" rx="4"/>
+      <rect x="396" y="218" width="12" height="26" rx="4"/>
+      <rect x="412" y="218" width="12" height="26" rx="4"/>
+    </g>
+    <rect x="70" y="252" width="372" height="6" fill="#003876"/>
+    <circle cx="430" cy="192" r="10" fill="none" stroke="#003876" stroke-width="2"/>
+    <text x="430" y="196" font-family="'Manrope', sans-serif" font-size="10" font-weight="bold" fill="#003876" text-anchor="middle">R</text>
+  </g>
+  <text x="256" y="365" font-family="'Manrope', 'Segoe UI', Arial, sans-serif" font-size="52" font-weight="800" fill="#dc2626" text-anchor="middle" letter-spacing="4">MIT-WPU</text>
+  <text x="256" y="415" font-family="'Noto Sans Devanagari', 'Mangal', 'Arial', sans-serif" font-size="20" font-weight="700" fill="#003876" text-anchor="middle" letter-spacing="2">॥ विश्वशान्तिर्ध्रुवं ध्रुवा ॥</text>
+  <text x="256" y="450" font-family="'Manrope', 'DM Mono', sans-serif" font-size="15" font-weight="600" fill="#64748b" text-anchor="middle" letter-spacing="7">PUNE · INDIA</text>
+</svg>

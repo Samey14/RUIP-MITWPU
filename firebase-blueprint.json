@@ -1,0 +1,387 @@
+{
+  "entities": {
+    "Expense": {
+      "title": "Expense",
+      "description": "Individual field expense entry incurred during rural immersion camp",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the expense",
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "maxLength": 128
+        },
+        "tripId": {
+          "type": "string",
+          "description": "Identifier of the associated immersion trip",
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "maxLength": 128
+        },
+        "date": {
+          "type": "string",
+          "description": "Date expense was incurred (YYYY-MM-DD)",
+          "maxLength": 30
+        },
+        "category": {
+          "type": "string",
+          "description": "Expense head/category e.g. Food, Transport, Stationery",
+          "maxLength": 60
+        },
+        "vendor": {
+          "type": "string",
+          "description": "Payee or vendor name",
+          "maxLength": 120
+        },
+        "amount": {
+          "type": "number",
+          "description": "Expense amount in INR"
+        },
+        "paymentMode": {
+          "type": "string",
+          "description": "Payment instrument used",
+          "maxLength": 40
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed explanation or purpose of expenditure",
+          "maxLength": 500
+        },
+        "billNumber": {
+          "type": "string",
+          "description": "Voucher or tax memo invoice number",
+          "maxLength": 60
+        },
+        "chargeTo": {
+          "type": "string",
+          "description": "Head of allocation (Students, Faculty, Shared)",
+          "maxLength": 60
+        },
+        "paidByFaculty": {
+          "type": "string",
+          "description": "Name or email of faculty who paid",
+          "maxLength": 120
+        },
+        "hasBillProof": {
+          "type": "boolean",
+          "description": "Whether receipt/memo photo is attached"
+        },
+        "hasUpiProof": {
+          "type": "boolean",
+          "description": "Whether digital UPI transaction screenshot is attached"
+        },
+        "billVerification": {
+          "type": "string",
+          "description": "Verification status by Accounts admin: Pending, Verified, Rejected",
+          "enum": ["Pending", "Verified", "Rejected"]
+        },
+        "verifiedBy": {
+          "type": "string",
+          "description": "Admin email who verified the entry",
+          "maxLength": 120
+        },
+        "verifiedAt": {
+          "type": "string",
+          "description": "Timestamp of verification",
+          "maxLength": 40
+        },
+        "rejectionRemark": {
+          "type": "string",
+          "description": "Remark or reason provided by Accounts upon rejecting this expense/ledger entry",
+          "maxLength": 500
+        },
+        "rejectedBy": {
+          "type": "string",
+          "description": "Admin email who rejected the entry",
+          "maxLength": 120
+        },
+        "rejectedAt": {
+          "type": "string",
+          "description": "Timestamp of rejection",
+          "maxLength": 40
+        },
+        "notes": {
+          "type": "string",
+          "description": "Coordination or audit note",
+          "maxLength": 500
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of creation",
+          "maxLength": 40
+        }
+      },
+      "required": ["id", "tripId", "date", "category", "vendor", "amount", "paymentMode", "paidByFaculty", "createdAt"]
+    },
+    "Trip": {
+      "title": "Trip",
+      "description": "A Rural Immersion Programme cohort expedition",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique trip ID",
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "maxLength": 128
+        },
+        "tripCode": {
+          "type": "string",
+          "description": "Unique code e.g. RUIP-2026-DURGAON",
+          "maxLength": 60
+        },
+        "location": {
+          "type": "string",
+          "description": "Camp location display",
+          "maxLength": 100
+        },
+        "village": {
+          "type": "string",
+          "description": "Target village",
+          "maxLength": 60
+        },
+        "taluka": {
+          "type": "string",
+          "description": "Taluka administrative sub-division",
+          "maxLength": 60
+        },
+        "district": {
+          "type": "string",
+          "description": "District",
+          "maxLength": 60
+        },
+        "department": {
+          "type": "string",
+          "description": "Academic department",
+          "maxLength": 100
+        },
+        "startDate": {
+          "type": "string",
+          "description": "Camp start date",
+          "maxLength": 30
+        },
+        "endDate": {
+          "type": "string",
+          "description": "Camp end date",
+          "maxLength": 30
+        },
+        "totalStudents": {
+          "type": "number",
+          "description": "Total participating students"
+        },
+        "totalFaculty": {
+          "type": "number",
+          "description": "Total faculty coordinators"
+        },
+        "budget": {
+          "type": "number",
+          "description": "Sanctioned advance amount in INR"
+        },
+        "status": {
+          "type": "string",
+          "description": "Trip stage",
+          "enum": ["Planned", "Ongoing", "Completed"]
+        },
+        "studentsList": {
+          "type": "array",
+          "description": "Compulsory roster of participating student names, roll numbers, or institutional emails"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Camp overview notes",
+          "maxLength": 500
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Creation timestamp",
+          "maxLength": 40
+        }
+      },
+      "required": ["id", "tripCode", "village", "taluka", "district", "startDate", "endDate", "budget", "status"]
+    },
+    "ImmersionCamp": {
+      "title": "ImmersionCamp",
+      "description": "Active village immersion camp metadata and parameters",
+      "type": "object",
+      "properties": {
+        "tripCode": {
+          "type": "string",
+          "description": "Unique code for the camp",
+          "maxLength": 60
+        },
+        "village": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "taluka": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "district": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "academicYear": {
+          "type": "string",
+          "maxLength": 30
+        },
+        "department": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "startDate": {
+          "type": "string",
+          "maxLength": 30
+        },
+        "endDate": {
+          "type": "string",
+          "maxLength": 30
+        },
+        "totalDays": {
+          "type": "number"
+        },
+        "currentDay": {
+          "type": "number"
+        },
+        "totalStudents": {
+          "type": "number"
+        },
+        "totalFaculty": {
+          "type": "number"
+        },
+        "advanceReceived": {
+          "type": "number"
+        },
+        "advanceDate": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "status": {
+          "type": "string",
+          "maxLength": 30
+        },
+        "ledgerStatus": {
+          "type": "string",
+          "maxLength": 30
+        },
+        "ledgerRejectionRemark": {
+          "type": "string",
+          "maxLength": 500
+        }
+      },
+      "required": ["tripCode", "village", "taluka", "district", "advanceReceived", "status"]
+    },
+    "Faculty": {
+      "title": "Faculty",
+      "description": "Faculty profile information",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "department": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "designation": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "employeeId": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 30
+        },
+        "avatarInitials": {
+          "type": "string",
+          "maxLength": 10
+        }
+      },
+      "required": ["name", "email", "department", "employeeId"]
+    },
+    "RegisteredUser": {
+      "title": "RegisteredUser",
+      "description": "Authorized institutional account registered by MIT-WPU Admin Department",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "role": {
+          "type": "string",
+          "enum": ["faculty", "admin"]
+        },
+        "department": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "designation": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "employeeId": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "phone": {
+          "type": "string",
+          "maxLength": 30
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "suspended"]
+        },
+        "registeredBy": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "registeredAt": {
+          "type": "string",
+          "maxLength": 50
+        }
+      },
+      "required": ["id", "email", "name", "role", "department", "employeeId", "status"]
+    }
+  },
+  "firestore": {
+    "/expenses/{expenseId}": {
+      "schema": "Expense",
+      "description": "Collection of rural immersion expense vouchers and receipts"
+    },
+    "/trips/{tripId}": {
+      "schema": "Trip",
+      "description": "Collection of rural immersion cohorts and trips"
+    },
+    "/camps/{campId}": {
+      "schema": "ImmersionCamp",
+      "description": "Immersion camp configuration details"
+    },
+    "/faculty/{facultyId}": {
+      "schema": "Faculty",
+      "description": "Faculty coordinator profile records"
+    },
+    "/registered_users/{userId}": {
+      "schema": "RegisteredUser",
+      "description": "Directory of accounts pre-authorized by Admin Department"
+    },
+    "/signatures/{tripCode}": {
+      "schema": "object",
+      "description": "Digital signatures for accounts statement clearance"
+    }
+  }
+}

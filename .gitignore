@@ -1,0 +1,12 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+__MACOSX/
+Thumbs.db
+*.zip
+*.tar.gz
+*.log
+.env*
+!.env.example

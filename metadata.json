@@ -1,0 +1,8 @@
+{
+  "name": "RUIP Expense Tracker — MIT-WPU",
+  "description": "Sleek offline-ready expense tracking, faculty authentication, immersion budget ledger, and analytics for rural immersion programmes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

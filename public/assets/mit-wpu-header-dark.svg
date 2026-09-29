@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 180" width="100%" height="100%">
+  <!-- Emblem on the left in white/glow -->
+  <g transform="translate(10, 5) scale(0.68)">
+    <path d="M 145 10 H 155 V 24 H 164 V 32 H 155 V 48 H 145 V 32 H 136 V 24 H 145 Z" fill="#bbf7d0"/>
+    <rect x="134" y="46" width="32" height="6" rx="2" fill="#bbf7d0"/>
+    <path d="M 35 150 C 35 70, 85 50, 150 50 C 215 50, 265 70, 265 150 Z" fill="none" stroke="#bbf7d0" stroke-width="7"/>
+    <path d="M 55 150 C 60 90, 100 60, 150 50 C 200 60, 240 90, 245 150" fill="none" stroke="#bbf7d0" stroke-width="3.5"/>
+    <path d="M 85 150 C 95 100, 120 70, 150 50 C 180 70, 205 100, 215 150" fill="none" stroke="#bbf7d0" stroke-width="3.5"/>
+    <line x1="150" y1="50" x2="150" y2="150" stroke="#bbf7d0" stroke-width="4.5"/>
+    <path d="M 50 120 C 75 95, 225 95, 250 120" fill="none" stroke="#bbf7d0" stroke-width="3.5"/>
+    <rect x="20" y="150" width="260" height="32" fill="#bbf7d0" rx="2"/>
+    <g fill="#09090b">
+      <rect x="30" y="156" width="9" height="20" rx="3"/>
+      <rect x="47" y="156" width="9" height="20" rx="3"/>
+      <rect x="64" y="156" width="9" height="20" rx="3"/>
+      <rect x="81" y="156" width="9" height="20" rx="3"/>
+      <rect x="98" y="156" width="9" height="20" rx="3"/>
+      <rect x="115" y="156" width="9" height="20" rx="3"/>
+      <rect x="132" y="156" width="9" height="20" rx="3"/>
+      <rect x="149" y="156" width="9" height="20" rx="3"/>
+      <rect x="166" y="156" width="9" height="20" rx="3"/>
+      <rect x="183" y="156" width="9" height="20" rx="3"/>
+      <rect x="200" y="156" width="9" height="20" rx="3"/>
+      <rect x="217" y="156" width="9" height="20" rx="3"/>
+      <rect x="234" y="156" width="9" height="20" rx="3"/>
+      <rect x="251" y="156" width="9" height="20" rx="3"/>
+    </g>
+    <rect x="15" y="182" width="270" height="4" fill="#bbf7d0"/>
+    <text x="150" y="215" font-family="'Manrope', sans-serif" font-size="28" font-weight="800" fill="#f87171" text-anchor="middle">MIT-WPU</text>
+    <text x="150" y="234" font-family="'Noto Sans Devanagari', sans-serif" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">॥ विश्वशान्तिर्ध्रुवं ध्रुवा ॥</text>
+  </g>
+  <line x1="220" y1="20" x2="220" y2="150" stroke="#f59e0b" stroke-width="4"/>
+  <text x="240" y="45" font-family="'Manrope', sans-serif" font-size="15" font-weight="600" fill="#e4e4e7">Dr. Vishwanath Karad</text>
+  <text x="240" y="85" font-family="'Syne', sans-serif" font-size="36" font-weight="800" fill="#ffffff" letter-spacing="1">MIT WORLD PEACE</text>
+  <text x="240" y="125" font-family="'Syne', sans-serif" font-size="34" font-weight="800" fill="#38bdf8" letter-spacing="1">UNIVERSITY | PUNE</text>
+  <text x="240" y="155" font-family="'Manrope', sans-serif" font-size="11" font-weight="700" fill="#a1a1aa" letter-spacing="2.5">TECHNOLOGY, RESEARCH, SOCIAL INNOVATION &amp; PARTNERSHIPS</text>
+</svg>

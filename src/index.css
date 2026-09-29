@@ -1,0 +1,139 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
+
+@layer base {
+  :root {
+    --font-heading: 'Syne', sans-serif;
+    --font-body: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font-body);
+    font-variant-numeric: tabular-nums;
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+  }
+
+  .font-heading {
+    font-family: var(--font-heading);
+  }
+
+  .font-mono-tabular {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(140, 140, 140, 0.2);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(140, 140, 140, 0.35);
+}
+
+/* Print Optimization for Formal Accounts Statement */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm 10mm;
+  }
+
+  html, body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 8pt !important;
+    line-height: 1.25 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  aside, header, nav, footer, .no-print, button, .action-bar, input, select {
+    display: none !important;
+  }
+
+  *, *:before, *:after {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  ::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  .print-clean {
+    border: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    display: block !important;
+  }
+
+  table {
+    page-break-inside: auto !important;
+  }
+
+  #statement-printable .overflow-x-auto {
+    overflow: visible !important;
+  }
+
+  #statement-printable table {
+    width: 100% !important;
+    min-width: 0 !important;
+    font-size: 6.8pt !important;
+    table-layout: fixed !important;
+  }
+
+  #statement-printable th,
+  #statement-printable td {
+    padding: 3px 4px !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  #statement-printable th:first-child { width: 4% !important; }
+  #statement-printable th:nth-child(2),
+  #statement-printable th:nth-child(3) { width: 11% !important; }
+  #statement-printable th:nth-child(4) { width: 26% !important; }
+  #statement-printable th:nth-child(5) { width: 14% !important; }
+  #statement-printable th:nth-child(6) { width: 10% !important; }
+  #statement-printable th:nth-child(7),
+  #statement-printable th:nth-child(8) { width: 12% !important; }
+
+  thead {
+    display: table-header-group !important;
+  }
+
+  tr, .sig-block {
+    page-break-inside: avoid !important;
+  }
+
+  .compact-print table {
+    font-size: 7pt !important;
+  }
+
+  .compact-print th, .compact-print td {
+    padding: 2px 4px !important;
+  }
+}
